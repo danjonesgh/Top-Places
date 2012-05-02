@@ -10,14 +10,39 @@
 #import "FlickrFetcher.h"
 #import "PhotoListViewController.h"
 
+@interface TopPlacesViewController() 
+
+@property (strong, nonatomic) NSDictionary *placesByCountry;
+@property (strong, nonatomic) NSArray *sectionHeaders;
+
+@end
+
 @implementation TopPlacesViewController
 
 @synthesize topPlaces = _topPlaces;
+
+@synthesize placesByCountry = _placesByCountry;
+@synthesize sectionHeaders = _sectionHeaders;
+
 
 #define CONTENT_KEY @"_content"
 
 
 #pragma mark - Setup methods
+
+- (NSString *)parseForCountry: (NSDictionary *) topPlace {
+	
+	// Get the place information from the given topPlace
+	NSString *placeInformation = [topPlace objectForKey:CONTENT_KEY];
+	
+	// Search the place information for the last comma. 
+	NSRange lastComma = [placeInformation rangeOfString:@"," options:NSBackwardsSearch];
+	
+	// Return the text that comes after the last comma
+	if (lastComma.location != NSNotFound) {
+		return [placeInformation substringFromIndex:lastComma.location + 2];
+	} else return @"";
+}
 
 - (void)loadTopPlaces {
 	
@@ -32,6 +57,30 @@
 	// Set up the array of top places, organised by place descriptions
 	self.topPlaces = [[FlickrFetcher topPlaces] 
 							sortedArrayUsingDescriptors:sortDescriptors];
+	
+
+	// We want to divide the places up by country, so we can use a dictionary with the country
+	// names as key as the places as values
+	NSMutableDictionary *placesByCountry = [NSMutableDictionary dictionary];
+	
+	// For each place
+	for (NSDictionary *place in self.topPlaces) {
+		// extract the country name
+		NSString *country = [self parseForCountry:place];	
+		// If the country isn't already in the dictionary, add it with a new array
+		if (![placesByCountry objectForKey:country]) {
+			[placesByCountry setObject:[NSMutableArray array] forKey:country];
+		}
+		// Add the place to the countries' value array
+		[(NSMutableArray *)[placesByCountry objectForKey:country] addObject:place];		
+	}
+	
+	// Set the place by country
+	self.placesByCountry = [NSDictionary dictionaryWithDictionary:placesByCountry];
+	
+	// Set up the section headers in alphabetical order	
+	self.sectionHeaders = [[placesByCountry allKeys] sortedArrayUsingSelector: 
+								  @selector(caseInsensitiveCompare:)];
 }
 
 
@@ -61,23 +110,46 @@
 }
 
 
+
 #pragma mark - Table view data source
+
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+
+	// Return the number of sections
+	return self.sectionHeaders.count;
+}
+
+- (NSString *) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
+	
+	// Return the header at the given index
+	return [self.sectionHeaders objectAtIndex:section];	
+}
+
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
    
-	// Return the number of rows in the section.
-   return [self.topPlaces count];
+	// Return the number of rows for the given the section
+	return [[self.placesByCountry objectForKey:
+				[self.sectionHeaders objectAtIndex:section]] count];
+
 }
+
+
 
 - (UITableViewCell *)tableView:(UITableView *)tableView 
 			cellForRowAtIndexPath:(NSIndexPath *)indexPath {
    
 	static NSString *CellIdentifier = @"Top Place Descriptions";
    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier];
-	
-	
+
+
+	// Get a handle the dictionary that contains the selected top place information
+	NSDictionary *topPlaceDictionary = 
+	[[self.placesByCountry objectForKey:[self.sectionHeaders objectAtIndex:indexPath.section]] 
+	 objectAtIndex:indexPath.row];
+
 	// Extract the place name information for the cell
-	NSDictionary *topPlaceDictionary = [self.topPlaces objectAtIndex:indexPath.row];
 	NSString *topPlaceDescription = [topPlaceDictionary objectForKey:CONTENT_KEY];
 	
 	// Format the top place description into the cell's title and subtitle
@@ -93,8 +165,8 @@
 		cell.textLabel.text = [topPlaceDescription substringToIndex:firstComma.location];
 		cell.detailTextLabel.text = [topPlaceDescription substringFromIndex:
 											  firstComma.location + 1];		
-	}
-   return cell;
+	}	
+   return cell;	 
 }
 
 
