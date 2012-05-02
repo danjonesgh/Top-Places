@@ -56,17 +56,9 @@
 	[super viewWillAppear:animated];
 }
 
-- (void) viewWillDisappear:(BOOL)animated {
-	// Show the navigation bar for view controllers when this view disappears
-	[self.navigationController setNavigationBarHidden:NO animated:animated];
-	[super viewWillDisappear:animated];
-}
-
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
 	return YES;
 }
-
-#pragma mark - Data extraction
 
 
 #pragma mark - Table view data source
@@ -118,20 +110,6 @@
 	[[segue destinationViewController] setPhotoList:[FlickrFetcher photosInPlace:placeDictionary
 																							maxResults:50]
 													  withTitle:[[sender textLabel] text]];
-}
-
-
-#pragma mark - Table view delegate
-
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-   // Navigation logic may go here. Create and push another view controller.
-   /*
-    <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-    // ...
-    // Pass the selected object to the new view controller.
-    [self.navigationController pushViewController:detailViewController animated:YES];
-    */
 }
 
 

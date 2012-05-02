@@ -90,7 +90,7 @@
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 </view>
                                 <connections>
-                                    <segue destination="ydI-bp-RiA" kind="push" id="Tgg-W1-x2r"/>
+                                    <segue destination="ydI-bp-RiA" kind="push" id="cmY-2A-diW"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -118,7 +118,7 @@
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <subviews>
                                     <imageView userInteractionEnabled="NO" contentMode="scaleToFill" id="pys-wo-pV6">
-                                        <rect key="frame" x="0.0" y="0.0" width="320" height="367"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="320" height="460"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                     </imageView>
                                 </subviews>
@@ -170,7 +170,7 @@
                                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 </view>
                                 <connections>
-                                    <segue destination="ydI-bp-RiA" kind="push" id="rcc-gm-6MC"/>
+                                    <segue destination="ydI-bp-RiA" kind="push" id="BtR-z8-ua4"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -250,6 +250,7 @@
             <relationships>
                 <relationship kind="outlet" name="imageView" candidateClass="UIImageView"/>
                 <relationship kind="outlet" name="scrollView" candidateClass="UIScrollView"/>
+                <relationship kind="outlet" name="toolbar" candidateClass="UIToolbar"/>
             </relationships>
         </class>
         <class className="RecentPhotoListViewController" superclassName="PhotoListViewController">
@@ -265,6 +266,6 @@
         <simulatedScreenMetrics key="destination"/>
     </simulatedMetricsContainer>
     <inferredMetricsTieBreakers>
-        <segue reference="Tgg-W1-x2r"/>
+        <segue reference="BtR-z8-ua4"/>
     </inferredMetricsTieBreakers>
 </document>

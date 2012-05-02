@@ -12,4 +12,6 @@
 
 @property (strong, nonatomic) NSDictionary *photo;
 
+- (void)refreshWithPhoto:(NSDictionary *) photoDictionary;
+
 @end

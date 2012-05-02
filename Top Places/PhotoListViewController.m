@@ -37,6 +37,11 @@
    self.clearsSelectionOnViewWillAppear = NO;
 }
 
+- (void)viewWillAppear:(BOOL)animated {
+	// Show the navigation bar for view controllers when this view disappears
+	[self.navigationController setNavigationBarHidden:NO animated:animated];
+}
+
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
 	return YES;
 }
@@ -82,27 +87,30 @@
 
 #pragma mark - Segueing
 
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-	
+- (NSDictionary *)photoDictionary {
 	// Get a handle to the photo dictionary at the currently selected row
-	NSDictionary *photoDictionary = 
-	[self.photoList objectAtIndex:self.tableView.indexPathForSelectedRow.row];
-	
+   return [self.photoList objectAtIndex:self.tableView.indexPathForSelectedRow.row];
+}
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {	
+
 	// Set the retrieved image in the destination controller
-	[[segue destinationViewController] setPhoto:photoDictionary];
+	[[segue destinationViewController] setPhoto:[self photoDictionary]];
 }
 
 #pragma mark - Table view delegate
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    // Navigation logic may go here. Create and push another view controller.
-    /*
-     <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-     // ...
-     // Pass the selected object to the new view controller.
-     [self.navigationController pushViewController:detailViewController animated:YES];
-     */
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	
+	// Get a handle to the detail view controller
+	PhotoViewController *photoViewController = 
+		[[self.splitViewController viewControllers] lastObject];
+	
+	if (photoViewController) {
+		// Set up the photoViewController model and synchronize it's views
+		[photoViewController refreshWithPhoto: [self photoDictionary]];
+	} // otherwise handled by the segue
+	
 }
 
 

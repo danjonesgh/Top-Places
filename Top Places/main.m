@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
 {
 	@autoreleasepool {
 		
+		/*
 		// First get a pointer to the topPlaces using the given FlickrFetcher method
 		NSArray *topPlaces = [FlickrFetcher topPlaces];
 		
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
 																 maxResults:1];
 		
 		NSLog(@"The photos for the first top place description is %@:", [photosInPlace description]);
-		
+		*/
 		return UIApplicationMain(argc, argv, nil, NSStringFromClass([TopPlacesAppDelegate class]));
 	}
 }
