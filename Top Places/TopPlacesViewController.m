@@ -174,8 +174,15 @@
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
 	
-	// Get a pointer to the dictionary at the currently selected row index
+	int section = self.tableView.indexPathForSelectedRow.section;
+	int row = self.tableView.indexPathForSelectedRow.row;
+	
+	
+	// Identify the selected place from within the places by country dictionary
 	NSDictionary *placeDictionary = 
+		[[self.placesByCountry valueForKey:
+		  [self.sectionHeaders objectAtIndex:section]] objectAtIndex:row];
+	
 	[self.topPlaces objectAtIndex:self.tableView.indexPathForSelectedRow.row];
 	
 	// Set up the photo descriptions in the PhotoDescriptionViewController
