@@ -14,6 +14,8 @@
 
 @property (strong, nonatomic) NSDictionary *placesByCountry;
 @property (strong, nonatomic) NSArray *sectionHeaders;
+@property (strong, nonatomic) IBOutlet UIActivityIndicatorView *spinner;
+
 
 @end
 
@@ -23,6 +25,7 @@
 
 @synthesize placesByCountry = _placesByCountry;
 @synthesize sectionHeaders = _sectionHeaders;
+@synthesize spinner = _spinner;
 
 
 #define CONTENT_KEY @"_content"
@@ -42,9 +45,31 @@
 	if (lastComma.location != NSNotFound) {
 		return [placeInformation substringFromIndex:lastComma.location + 2];
 	} else return @"";
+	
+	
 }
 
+- (UIActivityIndicatorView *)spinner {
+	
+	// If we don't have a spinner, then set one up
+	if (!_spinner) {
+		
+	 	// Setup the spinner
+		_spinner =[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:
+					  UIActivityIndicatorViewStyleWhite];		
+		
+		// Add the spinner to the tab bar
+		[self.tabBarController.tabBar addSubview:_spinner];			
+		
+	}
+	
+	return _spinner;
+}
+
+
+
 - (void)loadTopPlaces {
+	
 	
 	// Only load data if not set up already
 	if (self.topPlaces) return;
@@ -53,16 +78,15 @@
 	NSArray *sortDescriptors = [NSArray arrayWithObject:
 										 [NSSortDescriptor sortDescriptorWithKey:CONTENT_KEY 
 																				 ascending:YES]];
-	
-	// Set up the array of top places, organised by place descriptions
-	self.topPlaces = [[FlickrFetcher topPlaces] 
-							sortedArrayUsingDescriptors:sortDescriptors];
-	
 
-	// We want to divide the places up by country, so we can use a dictionary with the country
-	// names as key as the places as values
-	NSMutableDictionary *placesByCountry = [NSMutableDictionary dictionary];
+
+	// Set up the array of top places, organised by place descriptions
+	self.topPlaces = [[FlickrFetcher topPlaces] sortedArrayUsingDescriptors:sortDescriptors];
 	
+	// We want to divide the places up by country, so we can use a dictionary with the 
+	// country names as key and the places as values
+	NSMutableDictionary *placesByCountry = [NSMutableDictionary dictionary];
+			
 	// For each place
 	for (NSDictionary *place in self.topPlaces) {
 		// extract the country name
@@ -74,13 +98,14 @@
 		// Add the place to the countries' value array
 		[(NSMutableArray *)[placesByCountry objectForKey:country] addObject:place];		
 	}
-	
+			
 	// Set the place by country
 	self.placesByCountry = [NSDictionary dictionaryWithDictionary:placesByCountry];
-	
+			
 	// Set up the section headers in alphabetical order	
 	self.sectionHeaders = [[placesByCountry allKeys] sortedArrayUsingSelector: 
 								  @selector(caseInsensitiveCompare:)];
+
 }
 
 
@@ -88,8 +113,26 @@
 	
 	[super viewDidLoad];
 	
-	// Setup any model data from Flickr
-	[self loadTopPlaces];	
+	// Animate the spinner
+	[self.spinner startAnimating];
+	
+	// Initialise the queue used to download from flickr
+	dispatch_queue_t dispatchQueue = dispatch_queue_create("q_loadTopPlaces", NULL);
+	
+	// Use the download queue to asynchronously get the list of Top Places
+	dispatch_async(dispatchQueue, ^{ 
+		
+		[self loadTopPlaces];
+		
+		// Use the main queue to refresh update the view
+		dispatch_async(dispatch_get_main_queue(), ^{	
+			[self.tableView reloadData]; // Seems to be ok without check for self.tableView.window
+			[self.spinner stopAnimating];
+		});
+		
+	});	
+	// Release the queue
+	dispatch_release(dispatchQueue);	
 	
 	// Preserve selection between presentations.
    self.clearsSelectionOnViewWillAppear = NO;
@@ -97,12 +140,15 @@
 
 - (void)viewDidUnload {
 	[super viewDidUnload];
+	
+
 }
 
 - (void) viewWillAppear:(BOOL)animated {
 	// Hide the navigation bar for view controllers when this view appears
 	[self.navigationController setNavigationBarHidden:YES animated:animated];
 	[super viewWillAppear:animated];
+
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -185,10 +231,29 @@
 	
 	[self.topPlaces objectAtIndex:self.tableView.indexPathForSelectedRow.row];
 	
-	// Set up the photo descriptions in the PhotoDescriptionViewController
-	[[segue destinationViewController] setPhotoList:[FlickrFetcher photosInPlace:placeDictionary
-																							maxResults:50]
-													  withTitle:[[sender textLabel] text]];
+	
+
+	// Initialise the queue used to download from flickr
+	dispatch_queue_t dispatchQueue = dispatch_queue_create("q_photosInPlace", NULL);
+	[self.spinner startAnimating];	
+	
+	// Using the dowload queue, fetch the array of photos based on the selected dictionary
+	dispatch_async(dispatchQueue, ^{ 
+		
+		NSArray *photos = [FlickrFetcher photosInPlace:placeDictionary maxResults:50];		
+
+		// Use the main queue to prepare for segue 
+		dispatch_async(dispatch_get_main_queue(), ^{	
+			// Set up the photo descriptions in the PhotoDescriptionViewController
+			[[segue destinationViewController] setPhotoList:photos
+															  withTitle:[[sender textLabel] text]];			
+			[[[segue destinationViewController] tableView] reloadData];
+			[self.spinner stopAnimating];
+		});
+		
+	});	
+	dispatch_release(dispatchQueue);
+	
 }
 
 

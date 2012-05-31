@@ -21,7 +21,7 @@
 
 @property (weak, nonatomic) IBOutlet UIImageView *imageView;
 @property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
-@property (weak, nonatomic) IBOutlet UIToolbar *toolbar;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *spinner;
 
 @end
 
@@ -29,17 +29,23 @@
 
 @synthesize imageView = _photoView;
 @synthesize scrollView = _scrollView;
+@synthesize spinner = _spinner;
 @synthesize photo = _photo;
-@synthesize toolbar = _toolbar;
 
-- (void)synchronizeView {
+
+- (NSData*) fetchImage {	
+	
+   // Return the image from Flickr
+	return [NSData dataWithContentsOfURL: 
+			  [FlickrFetcher urlForPhoto:self.photo format:FlickrPhotoFormatLarge]];	
+}
+
+- (void)synchronizeViewWithImage:(NSData *) imageData {
+	
 
 	// Place the image in the image view
-	self.imageView.image = [UIImage imageWithData:
-									[NSData dataWithContentsOfURL:
-									 [FlickrFetcher urlForPhoto:self.photo 
-																format:FlickrPhotoFormatLarge]]];
-	
+	self.imageView.image = [UIImage imageWithData:imageData];
+									 	
 	// Set the title of the image
 	self.title = [self.photo objectForKey:PHOTO_TITLE_KEY];
 	
@@ -52,6 +58,7 @@
 	// Setup the frame of the image
 	self.imageView.frame = 
 	CGRectMake(0, 0, self.imageView.image.size.width, self.imageView.image.size.height);
+	
 }
 	
 - (void) storePhoto {
@@ -112,21 +119,47 @@
 	
 }
 
+
 - (void)refreshWithPhoto:(NSDictionary *)photoDictionary {
 	
 	// Setup the model
 	self.photo = photoDictionary;
 	
-	// Save the photo
-	[self storePhoto];
-	
-	// Set up the view
-	[self synchronizeView];
-	
-	// Set the zoom level of the view to fill up the screen
-	[self fillView];
+	// Refresh the view
+	[self refresh];
 	
 }
+
+- (void)refresh {
+	
+	[self.spinner startAnimating];
+	
+	// Initialise the queue used to download from flickr
+	dispatch_queue_t dispatchQueue = dispatch_queue_create("q_photo", NULL);
+	
+	// Load the image using the queue
+	dispatch_async(dispatchQueue, ^{ 
+		NSString *photoID = [self.photo objectForKey:PHOTO_ID_KEY];
+		NSData *imageData = [self fetchImage];
+		
+		// Use the main queue to store the photo in NSUserDefaults and to display
+		dispatch_async(dispatch_get_main_queue(), ^{	
+			
+			// Only store and display if another photo hasn't been selected
+			if ([photoID isEqualToString:[self.photo objectForKey:PHOTO_ID_KEY]]) {
+				[self storePhoto];
+				[self synchronizeViewWithImage:imageData]; 
+				[self fillView]; // Sets the zoom level to fill screen
+				[self.spinner stopAnimating];
+			}
+			
+		});
+		
+	});	
+	dispatch_release(dispatchQueue);
+	
+}
+
 
 - (void)viewDidLoad {
 	
@@ -140,14 +173,11 @@
 	
 }
 
-- (void)viewWillAppear:(BOOL)animated {
+- (void)viewWillAppear:(BOOL)animated {	
 	
-	// Synchronize the view with model
-	[self synchronizeView];
+	// Refresh if we have a photo set
+	if (self.photo) [self refresh];
 	
-	// Store the photo in the view
-	if (self.photo) [self storePhoto];	
-		
 }
 
 - (void)viewWillLayoutSubviews { 
@@ -160,6 +190,7 @@
 - (void)viewDidUnload {
 	[self setImageView:nil];
 	[self setScrollView:nil];
+	[self setSpinner:nil];
 	[super viewDidUnload];
 }
 

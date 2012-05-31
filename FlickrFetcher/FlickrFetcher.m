@@ -14,7 +14,8 @@
 
 + (NSDictionary *)executeFlickrFetch:(NSString *)query
 {
-    query = [NSString stringWithFormat:@"%@&format=json&nojsoncallback=1&api_key=%@", query, FlickrAPIKey];
+    query = [NSString stringWithFormat:
+				 @"%@&format=json&nojsoncallback=1&api_key=%@", query, FlickrAPIKey];
     query = [query stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     // NSLog(@"[%@ %@] sent %@", NSStringFromClass([self class]), NSStringFromSelector(_cmd), query);
     NSData *jsonData = [[NSString stringWithContentsOfURL:[NSURL URLWithString:query] encoding:NSUTF8StringEncoding error:nil] dataUsingEncoding:NSUTF8StringEncoding];
@@ -33,12 +34,14 @@
 
 + (NSArray *)topPlaces
 {
-    NSString *request = [NSString stringWithFormat:@"http://api.flickr.com/services/rest/?method=flickr.places.getTopPlacesList&place_type_id=7"];
+
+	NSString *request = [NSString stringWithFormat:@"http://api.flickr.com/services/rest/?method=flickr.places.getTopPlacesList&place_type_id=7"];
     return [[self executeFlickrFetch:request] valueForKeyPath:@"places.place"];
 }
 
 + (NSArray *)photosInPlace:(NSDictionary *)place maxResults:(int)maxResults
 {
+	
     NSString *placeId = [place objectForKey:FLICKR_PLACE_ID];
     if (placeId) {
         NSString *request = [NSString stringWithFormat:@"http://api.flickr.com/services/rest/?method=flickr.photos.search&has_geo=1&place_id=%@&per_page=%d&extras=original_format,tags,description,geo,date_upload,owner_name,place_url", placeId, maxResults];
