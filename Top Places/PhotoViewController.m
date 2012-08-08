@@ -8,6 +8,7 @@
 
 #import "PhotoViewController.h"
 #import "FlickrFetcher.h"
+#import "DataCache.h"
 
 
 #define PHOTO_TITLE_KEY  @"title"
@@ -33,11 +34,21 @@
 @synthesize photo = _photo;
 
 
-- (NSData*) fetchImage {	
+- (NSString *) findPhotoID {
+	return [self.photo objectForKey:PHOTO_ID_KEY];
+}
+
+- (NSData *) fetchImage {
 	
-   // Return the image from Flickr
-	return [NSData dataWithContentsOfURL: 
-			  [FlickrFetcher urlForPhoto:self.photo format:FlickrPhotoFormatLarge]];	
+	// Fetch the image from the cache
+	NSData *image = [DataCache fetchData:[self findPhotoID]];
+	
+	if (!image) 
+		// Retrieve the image from Flickr
+		image = [NSData dataWithContentsOfURL: 
+					[FlickrFetcher urlForPhoto:self.photo format:FlickrPhotoFormatLarge]];
+	
+	return image;	
 }
 
 - (void)synchronizeViewWithImage:(NSData *) imageData {
@@ -61,8 +72,9 @@
 	
 }
 	
-- (void) storePhoto {
+- (void) storePhoto:(NSData *)imageData {
 	
+		
 	// We need to store the photo as an NSUserDefault, since it is recently viewed
 	// First get a handle to the standard user defaults
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -100,9 +112,13 @@
 	// Add the updated collection back into user defaults
 	
 	[defaults setObject:recentlyViewedPhotos forKey:RECENT_PHOTOS_KEY];
+	
+	// Cache the image
+	[DataCache storeData:[self findPhotoID] :imageData];
 		
 	// Save the defaults
 	[defaults synchronize];
+
 }
 	
 
@@ -139,7 +155,7 @@
 	
 	// Load the image using the queue
 	dispatch_async(dispatchQueue, ^{ 
-		NSString *photoID = [self.photo objectForKey:PHOTO_ID_KEY];
+		NSString *photoID = [self findPhotoID];
 		NSData *imageData = [self fetchImage];
 		
 		// Use the main queue to store the photo in NSUserDefaults and to display
@@ -147,7 +163,7 @@
 			
 			// Only store and display if another photo hasn't been selected
 			if ([photoID isEqualToString:[self.photo objectForKey:PHOTO_ID_KEY]]) {
-				[self storePhoto];
+				[self storePhoto:imageData];
 				[self synchronizeViewWithImage:imageData]; 
 				[self fillView]; // Sets the zoom level to fill screen
 				[self.spinner stopAnimating];

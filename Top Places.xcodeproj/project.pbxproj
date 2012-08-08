@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0F87369D15B984D600486996 /* DataCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 0F87369C15B984D600486996 /* DataCache.m */; };
 		0FA89014153EB684004DF8C3 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FA89013153EB684004DF8C3 /* UIKit.framework */; };
 		0FA89016153EB684004DF8C3 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FA89015153EB684004DF8C3 /* Foundation.framework */; };
 		0FA89018153EB684004DF8C3 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0FA89017153EB684004DF8C3 /* CoreGraphics.framework */; };
@@ -23,6 +24,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0F87369B15B984D600486996 /* DataCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataCache.h; sourceTree = "<group>"; };
+		0F87369C15B984D600486996 /* DataCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataCache.m; sourceTree = "<group>"; };
 		0FA8900F153EB684004DF8C3 /* Top Places.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Top Places.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		0FA89013153EB684004DF8C3 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		0FA89015153EB684004DF8C3 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -103,6 +106,8 @@
 				0FA8903F153ECDD2004DF8C3 /* RecentPhotoListViewController.m */,
 				0FA89044154025B0004DF8C3 /* PhotoViewController.h */,
 				0FA89045154025B0004DF8C3 /* PhotoViewController.m */,
+				0F87369B15B984D600486996 /* DataCache.h */,
+				0F87369C15B984D600486996 /* DataCache.m */,
 				0FA8901A153EB684004DF8C3 /* Supporting Files */,
 			);
 			path = "Top Places";
@@ -202,6 +207,7 @@
 				0FA89043153F0E9A004DF8C3 /* PhotoListViewController.m in Sources */,
 				0FA89046154025B0004DF8C3 /* PhotoViewController.m in Sources */,
 				0FC22CF9154DC01E00087D1D /* TopPlacesViewController.m in Sources */,
+				0F87369D15B984D600486996 /* DataCache.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

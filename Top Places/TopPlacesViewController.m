@@ -78,8 +78,7 @@
 	NSArray *sortDescriptors = [NSArray arrayWithObject:
 										 [NSSortDescriptor sortDescriptorWithKey:CONTENT_KEY 
 																				 ascending:YES]];
-
-
+	
 	// Set up the array of top places, organised by place descriptions
 	self.topPlaces = [[FlickrFetcher topPlaces] sortedArrayUsingDescriptors:sortDescriptors];
 	
